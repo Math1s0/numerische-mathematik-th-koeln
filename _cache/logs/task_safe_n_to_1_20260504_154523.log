@@ -1,0 +1,11 @@
+{"schema_version":"1.0.0","timestamp_utc":"2026-05-04T13:45:23.157172Z","logger":"task_safe_n_to_1","level":"INFO","event":"audit_log_init","message":"Persistent logging initialized at: C:\\Users\\Mathis\\Desktop\\Numerische Mathematik\\Projekt\\_cache\\logs\\task_safe_n_to_1_20260504_154523.log"}
+{"schema_version":"1.0.0","timestamp_utc":"2026-05-04T13:45:23.157667Z","logger":"task_safe_n_to_1","level":"INFO","event":"log","message":"Vorlesungs-Lauf beginnt: Lastprognose-Pipeline (Kapitel 01)."}
+{"schema_version":"1.0.0","timestamp_utc":"2026-05-04T13:45:52.505478Z","logger":"task_safe_n_to_1","level":"INFO","event":"log","message":"Kapitel 02: Lastdaten geladen und gespeichert."}
+{"schema_version":"1.0.0","timestamp_utc":"2026-05-04T13:45:52.904101Z","logger":"task_safe_n_to_1","level":"INFO","event":"log","message":"Kapitel 03: Datenlücken behandelt, bereinigter Datensatz gespeichert."}
+{"schema_version":"1.0.0","timestamp_utc":"2026-05-04T13:45:53.379225Z","logger":"task_safe_n_to_1","level":"INFO","event":"log","message":"Kapitel 04: Train/Eval-Split gespeichert."}
+{"schema_version":"1.0.0","timestamp_utc":"2026-05-04T13:45:55.602262Z","logger":"task_safe_n_to_1","level":"INFO","event":"log","message":"Kapitel 05: Kalender + Wetter-Features erstellt und gespeichert."}
+{"schema_version":"1.0.0","timestamp_utc":"2026-05-04T13:46:02.458261Z","logger":"task_safe_n_to_1","level":"INFO","event":"log","message":"Kapitel 06: Modell trainiert und gespeichert."}
+{"schema_version":"1.0.0","timestamp_utc":"2026-05-04T13:46:02.793680Z","logger":"task_safe_n_to_1","level":"INFO","event":"log","message":"Kapitel 07: 24-h-Vorhersage erzeugt und gespeichert."}
+{"schema_version":"1.0.0","timestamp_utc":"2026-05-04T13:46:03.065683Z","logger":"task_safe_n_to_1","level":"INFO","event":"log","message":"Kapitel 08: MAE=2673.4 MW, RMSE=3528.0 MW, MAPE=5.26%"}
+{"schema_version":"1.0.0","timestamp_utc":"2026-05-04T13:46:08.681994Z","logger":"task_safe_n_to_1","level":"INFO","event":"log","message":"Kapitel 09: Backtest abgeschlossen, mittlerer MAE = 2024.8 MW"}
+{"schema_version":"1.0.0","timestamp_utc":"2026-05-04T13:46:08.696784Z","logger":"task_safe_n_to_1","level":"INFO","event":"log","message":"Kapitel 10: Provenienz-Dokumentation abgeschlossen. Pipeline-Lauf beendet."}

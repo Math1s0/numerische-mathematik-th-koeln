@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:sequential-parameter-optimization.github.io)",
+      "Bash(pip install *)",
+      "Bash(python -c \"import pandas; import numpy; import sklearn; print\\('pandas', pandas.__version__\\); print\\('numpy', numpy.__version__\\); print\\('sklearn', sklearn.__version__\\)\")",
+      "Bash(python -c \"import lightgbm; print\\('lgbm', lightgbm.__version__\\)\")",
+      "Bash(python -c \"import matplotlib; print\\('matplotlib', matplotlib.__version__\\)\")",
+      "Bash(python -c \"from spotforecast2_safe.data import fetch_data; help\\(fetch_data\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(Get-ChildItem \"C:\\\\Users\\\\Mathis\\\\Desktop\\\\Numerische Mathematik\\\\Unterlagen\" -Recurse)",
+      "Bash(Select-Object FullName, Extension, Length)"
+    ]
+  }
+}
