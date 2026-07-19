@@ -3,15 +3,24 @@
 #| label: team4-registry
 #| echo: true
 from pathlib import Path
+import os
 import yaml
 
-teams_yml = Path(r"D:\workspace\challenge-leaderboard") / "teams.yml"
-teams = yaml.safe_load(teams_yml.read_text())["teams"]
-for tid in ("a_team", "a_team_entsoe"):
-    team = next((t for t in teams if t["id"] == tid), None)
-    assert team is not None, f"{tid} is not in challenge-leaderboard/teams.yml"
-    print(f"{tid:<14} display_name: {team['display_name']:<24} "
-          f"github: {', '.join(team['github_handles'])}")
+# Optional registry check against a local challenge-leaderboard clone. Set
+# CHALLENGE_LEADERBOARD_DIR to enable it; skipped when the file is absent so the
+# reproducibility package runs standalone, without the leaderboard repo.
+_lb_dir = os.environ.get("CHALLENGE_LEADERBOARD_DIR")
+teams_yml = (Path(_lb_dir) / "teams.yml") if _lb_dir else Path("teams.yml")
+if teams_yml.exists():
+    teams = yaml.safe_load(teams_yml.read_text())["teams"]
+    for tid in ("a_team", "a_team_entsoe"):
+        team = next((t for t in teams if t["id"] == tid), None)
+        assert team is not None, f"{tid} is not in challenge-leaderboard/teams.yml"
+        print(f"{tid:<14} display_name: {team['display_name']:<24} "
+              f"github: {', '.join(team['github_handles'])}")
+else:
+    print("teams.yml not found; skipping registry check "
+          "(set CHALLENGE_LEADERBOARD_DIR to enable).")
 
 # %% Cell 2
 #| label: team4-imports
@@ -48,8 +57,11 @@ logging.basicConfig(level=logging.WARNING)
 # any download or MultiTask call — gives this chapter its own download, cache,
 # and log directory. The package reads both env vars at call time via
 # get_data_home() / get_cache_home(), so setting them now is sufficient.
-os.environ["SPOTFORECAST2_DATA"]  = str(Path(r"D:\spotforecast2_data\ddmo_ch14_team4"))
-os.environ["SPOTFORECAST2_CACHE"] = str(Path(r"D:\spotforecast2_cache\ddmo_ch14_team4"))
+# Portable, package-relative homes: the frozen ENTSO-E snapshot ships in ./data,
+# and tuned models / logs are written under ./_cache next to this script.
+_HERE = Path(__file__).resolve().parent
+os.environ["SPOTFORECAST2_DATA"]  = str(_HERE / "data")
+os.environ["SPOTFORECAST2_CACHE"] = str(_HERE / "_cache")
 
 from lightgbm import LGBMRegressor
 from spotforecast2_safe.data import Period
@@ -98,21 +110,27 @@ print(f"END_DOWNLOAD  = {END_DOWNLOAD}  (covers tomorrow for ENTSO-E's day-ahead
 #| echo: true
 
 import os
-os.environ["ENTSOE_API_KEY"] = "e4c97956-b05f-4bc9-af46-6677f2790552"
-
 from spotforecast2_safe.downloader.entsoe import download_new_data
-api_key = os.environ.get("ENTSOE_API_KEY")
-assert api_key, "ENTSOE_API_KEY must be set in the environment."
 
-download_new_data(
-    api_key=api_key,
-    country_code="DE",
-    start=START_DOWNLOAD,
-    end=END_DOWNLOAD,
-    force=True,  # bypass the 24 h cooldown so every render pulls a fresh mirror
-    keep_forecast_future=True,
-    timeout=60,  # bound stalled reads: a dead socket once hung a render forever
-)
+# The API key is read from the environment only — never hard-coded. It is only
+# needed when the frozen CSVs under ./data/interim are absent; with the bundled
+# snapshot present the download is skipped and no key / network is required.
+api_key = os.environ.get("ENTSOE_API_KEY")
+
+_energy_csv = get_data_home() / "interim" / "energy_load.csv"
+if _energy_csv.exists():
+    print(f"using frozen snapshot: {_energy_csv}")
+else:
+    assert api_key, "ENTSOE_API_KEY must be set in the environment to download the data."
+    download_new_data(
+        api_key=api_key,
+        country_code="DE",
+        start=START_DOWNLOAD,
+        end=END_DOWNLOAD,
+        force=True,  # bypass the 24 h cooldown so every render pulls a fresh mirror
+        keep_forecast_future=True,
+        timeout=60,  # bound stalled reads: a dead socket once hung a render forever
+    )
 
 # %% Cell 5
 interim_csv = get_data_home() / "interim" / "energy_load.csv"
@@ -198,10 +216,13 @@ print(interim[["Actual Load"]].dropna().head(4))
 # They are day-ahead values (published D-1), so they are leakage-clean at forecast time.
 
 from spotforecast2_safe.downloader.entsoe import download_renewable_forecast
-download_renewable_forecast(
-    api_key=api_key, country_code="DE", start=START_DOWNLOAD, end=END_DOWNLOAD, force=True,
-    timeout=60,
-)
+_renewable_csv = get_data_home() / "interim" / "renewable_forecast.csv"
+if not _renewable_csv.exists():
+    assert api_key, "ENTSOE_API_KEY must be set to download the renewable forecast."
+    download_renewable_forecast(
+        api_key=api_key, country_code="DE", start=START_DOWNLOAD, end=END_DOWNLOAD, force=True,
+        timeout=60,
+    )
 
 # %% Cell 9
 #| label: team4-renewable-inspect
@@ -217,10 +238,13 @@ print(f"gaps     : {renewable.isna().sum().to_dict()}")
 
 # %% Cell 10
 from spotforecast2_safe.downloader.entsoe import download_day_ahead_price
-download_day_ahead_price(
-    api_key=api_key, country_code="DE_LU", start=START_DOWNLOAD, end=END_DOWNLOAD, force=True,
-    timeout=60,
-)
+_price_csv = get_data_home() / "interim" / "day_ahead_price.csv"
+if not _price_csv.exists():
+    assert api_key, "ENTSOE_API_KEY must be set to download the day-ahead price."
+    download_day_ahead_price(
+        api_key=api_key, country_code="DE_LU", start=START_DOWNLOAD, end=END_DOWNLOAD, force=True,
+        timeout=60,
+    )
 
 # %% Cell 11
 #| label: team4-price-inspect
@@ -743,7 +767,10 @@ assert y0.notna().all(),        "NaN in forecast --- spec forbids"
 TEAM_ID = "a_team_entsoe" if team4_config.include_entsoe_forecast_load else "a_team"
 print(f"TEAM_ID = {TEAM_ID}  "
       f"(include_entsoe_forecast_load={team4_config.include_entsoe_forecast_load})")
-SUBMISSION_DIR = Path(r"D:\workspace\challenge-leaderboard") / "submissions" / TEAM_ID
+# Write the submission next to this script (./submissions/<team>/<date>.csv);
+# set SUBMISSION_ROOT to a challenge-leaderboard clone to write there instead.
+_sub_root = Path(os.environ.get("SUBMISSION_ROOT", str(_HERE)))
+SUBMISSION_DIR = _sub_root / "submissions" / TEAM_ID
 SUBMISSION_DIR.mkdir(parents=True, exist_ok=True)
 submission_path = SUBMISSION_DIR / f"{TOMORROW_UTC.date().isoformat()}.csv"
 
@@ -761,18 +788,25 @@ submission_df.head(3)
 #| label: team4-validate
 #| echo: true
 import subprocess
-lb_repo = Path(r"D:\workspace\challenge-leaderboard")
-result = subprocess.run(
-    [
-        "uv", "run", "python", "scripts/validate_submission.py",
-        "--path", str(submission_path.relative_to(lb_repo)),
-        "--skip-deadline",
-    ],
-    cwd=lb_repo,
-    capture_output=True,
-    text=True,
-)
-print("exit code:", result.returncode)
-print("stdout   :", result.stdout.strip())
-if result.stderr.strip():
-    print("stderr   :", result.stderr.strip())
+_lb_dir = os.environ.get("CHALLENGE_LEADERBOARD_DIR")
+lb_repo = Path(_lb_dir) if _lb_dir else None
+if (lb_repo is not None
+        and (lb_repo / "scripts" / "validate_submission.py").exists()
+        and submission_path.is_relative_to(lb_repo)):
+    result = subprocess.run(
+        [
+            "uv", "run", "python", "scripts/validate_submission.py",
+            "--path", str(submission_path.relative_to(lb_repo)),
+            "--skip-deadline",
+        ],
+        cwd=lb_repo,
+        capture_output=True,
+        text=True,
+    )
+    print("exit code:", result.returncode)
+    print("stdout   :", result.stdout.strip())
+    if result.stderr.strip():
+        print("stderr   :", result.stderr.strip())
+else:
+    print("leaderboard validator not run (set CHALLENGE_LEADERBOARD_DIR and write "
+          "the CSV inside that clone to enable schema validation).")
