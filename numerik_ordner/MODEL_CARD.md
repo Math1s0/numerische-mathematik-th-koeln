@@ -260,12 +260,12 @@ These are the figures for a **single target day**; accuracy varies from day to
 day, so they are not representative of the model's general performance, and a
 re-run of this package for its own target day will differ.
 
-**In context.** The companion baseline pipeline (`pipeline.py`, a simpler
-stock-LightGBM model on the same ENTSO-E data) measured **MAE = 2673.4 MW** on
-its November eval and a **rolling-backtest mean MAE = 2024.8 MW**. The `a_team`
-target-day **MAE = 2337 MW** sits squarely in that realistic range for DE load,
-confirming a genuine, correctly-scaled forecast — not the flat-forecast failure
-mode of §4. *(The baseline is a separate model on a different period; its numbers
+**In context.** For scale: a separate, simpler baseline (a stock-LightGBM model
+on the same ENTSO-E data — **not part of this package**) measured
+**MAE ≈ 2673 MW** on a November eval and a **rolling-backtest mean MAE ≈ 2025 MW**.
+The `a_team` target-day **MAE = 2337 MW** sits squarely in that realistic range
+for DE load, confirming a genuine, correctly-scaled forecast — not the
+flat-forecast failure mode of §4. *(Different model and period; the numbers
 anchor the scale, not a like-for-like comparison.)*
 
 **How this system's accuracy is established:**
@@ -326,7 +326,7 @@ code-rule notes below.
 | Data governance | Art. 10 | leakage guards (CR-3), NaN discipline, `truncate` policy | `truncate`/`skip` are risk-accepted (below) |
 | Technical documentation | Art. 11 | this card + `a_team_script.py` + run provenance (§4) + pinned `uv.lock` (§1) | — |
 | Record-keeping | Art. 12 | submitted CSVs immutably recorded in the **public** `challenge-leaderboard` git; per-run model + tuning JSON + logs under `./_cache/` | — |
-| Transparency | Art. 13 | feature importance + SHAP (§8) | — |
+| Transparency | Art. 13 | LightGBM feature importance; SHAP in the source notebook (§8) | SHAP not produced by the package script |
 | Accuracy / robustness | Art. 15 | tuned pipeline, backtest distribution, target-day MAE 2337 MW (§7) | scored on one leaderboard day |
 
 **Code-rule scope, stated honestly:**
