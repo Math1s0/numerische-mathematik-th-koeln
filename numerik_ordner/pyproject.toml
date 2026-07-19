@@ -1,0 +1,39 @@
+[project]
+name = "bart26k-lecture"
+version = "0.0.0"
+description = "Course materials: Numerische Mathematik and Data-Driven Modeling and Optimization SoSe 2026 (safety-critical time-series forecasting)"
+requires-python = ">=3.13"
+dependencies = [
+    # Chapter 14 needs the holiday-adjacency feature surface (sf2-safe 15.9.0),
+    # the exog-provider gap tolerance (16.1.0), the split tail budget
+    # (exog_max_tail_gap_hours) + bounded ENTSO-E download timeout (16.2.0),
+    # the exo_pred window-misalignment fix — a SAFETY pin, never lower it —
+    # (16.3.1: data_end clamped to the last observed target plus the
+    # exog/prediction-window alignment guard; 2026-06-05/06 incident), and
+    # the target-corruption detector/policy the team4-cutoff tripwire
+    # delegates to (16.4.0: target_qc_* knobs, target_corruption_policy,
+    # TargetCorruptionError). Floor raised to 21 for the breaking sf2-safe
+    # 21.0.0 release (dropped the dead n_jobs_spotoptim config field in lockstep
+    # with spotoptim 1.0, which is sequential-only); spotforecast2 7.0.0 requires
+    # both. spotoptim 1.0 is pulled transitively via spotforecast2 7.
+    "spotforecast2-safe>=21.0.0,<22",
+    "spotforecast2>=7.0.0,<8",
+    "matplotlib",
+    "ipykernel",
+    "pyarrow",
+    # >=0.8: the client accepts `timeout` (sf2-safe 16.2.0 passes it through).
+    "entsoe-py>=0.8",
+    "numpy",
+    "pandas",
+    "lightgbm",
+    "scipy",
+    # Required by Quarto's jupyter render launcher (not transitive via ipykernel).
+    "pyyaml",
+    "nbclient",
+    "nbformat",
+    "jupyter-client",
+]
+
+[tool.uv]
+# Pre-release pins (e.g. 2.0.1rc2) require explicit allow.
+prerelease = "allow"
